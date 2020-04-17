@@ -11,7 +11,7 @@
 
 typedef struct INSTRUCTION INSTRUCTION;
 struct INSTRUCTION{
-    int mi_indecies[INSTRUCT_LEN];
+   void (*mis_pointers[INSTRUCT_LEN])();
 };
 
 //ram
@@ -45,7 +45,7 @@ void cpu_cycle();
 static int16_t mipc;//program counter for micro instruction
 static int16_t fetched_address;
 static int8_t  fetched_value;
-static int extra;//index of an ekstra micro instruction
+static void (*extra_ptr)();//index of an ekstra micro instruction
 void (*micro_instructions[N_MI])();
 
 void execute_micro();

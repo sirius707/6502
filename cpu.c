@@ -50,7 +50,7 @@ void cpu_init(int8_t *memory, size_t n)
 
     for(int i = 0; i < N_INSTRUCTS; i++){
         for(int j = 0; j < INSTRUCT_LEN; j++){
-            instructions[i].mi_indecies[j] = -1;
+            instructions[i].mis_pointers[j] = NULL;
         }
     }
 
@@ -59,29 +59,11 @@ void cpu_init(int8_t *memory, size_t n)
     }
 
     mipc = 0;
-    extra = -1;
+    extra_ptr = NULL;
     fetched_instruction = -1;
 
-    micro_instructions[0] = microA;
-    micro_instructions[1] = microB;
-    micro_instructions[2] = microC;
-    micro_instructions[3] = microD;
-
-    micro_instructions[4] = mis_fetch_immediate_value;
-    micro_instructions[5] = mis_add_fval_accumlator;
-
-    instructions[1].mi_indecies[0] = 0;
-    instructions[1].mi_indecies[1] = 1;
-    instructions[1].mi_indecies[2] = 2;
-    instructions[1].mi_indecies[3] = 3;
-
-    instructions[2].mi_indecies[0] = 3;
-    instructions[2].mi_indecies[1] = 2;
-    instructions[2].mi_indecies[2] = 1;
-    instructions[2].mi_indecies[3] = 0;
-
-    instructions[69].mi_indecies[0] = 4;
-    instructions[69].mi_indecies[1] = 5;
+    instructions[69].mis_pointers[0] = mis_fetch_immediate_value;
+    instructions[69].mis_pointers[1] = mis_add_fval_accumlator;
 
 
     rom[0] = 69;
@@ -92,11 +74,10 @@ void cpu_init(int8_t *memory, size_t n)
 //run a micro instruction
 void execute_micro()
 {
-    if(extra != -1){//to simulate an extra cycle, required when page boundaries are crossed
-        (micro_instructions[extra])();
-    }else if(instructions[fetched_instruction].mi_indecies[mipc] != -1){
-        int ind = instructions[fetched_instruction].mi_indecies[mipc];
-        (micro_instructions[ind])();
+    if(extra_ptr != NULL){//to simulate an extra cycle, required when page boundaries are crossed
+        (*extra_ptr)();
+    }else if(instructions[fetched_instruction].mis_pointers[mipc] != NULL){
+        (instructions[fetched_instruction].mis_pointers[mipc])();
          mipc++;
     }
     cycle_count++;
@@ -114,7 +95,7 @@ void cpu_cycle()
 
     execute_micro();
 
-    if(instr_ptr->mi_indecies[mipc] == -1){
+    if(instr_ptr->mis_pointers[mipc] == NULL){
         mipc = 0;
         fetched_address = 0;
         fetched_value = AC;
