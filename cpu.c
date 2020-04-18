@@ -1,40 +1,6 @@
 #include "cpu.h"
 #include <stdio.h>
 
-void set_carry(int8_t bit);
-void set_zero(int8_t bit);
-
-void print_dbg_info();
-/**********************sample micro instructions *****************/
-void microA()
-{
-    puts("hi1");
-}
-void microB()
-{
-    puts("hi2");
-}
-void microC()
-{
-    puts("hi3");
-}
-void microD()
-{
-    puts("hi4");
-}
-/******************************************************************/
-
-void mis_fetch_immediate_value()
-{
-    fetched_value = rom[++PC];
-}
-
-void mis_add_fval_accumlator()
-{
-    set_carry((fetched_value + AC) > 0xff);
-    AC += fetched_value;
-    set_zero(AC);
-}
 
 void cpu_init(int8_t *memory, size_t n)
 {
@@ -68,6 +34,9 @@ void cpu_init(int8_t *memory, size_t n)
 
     rom[0] = 69;
     rom[1] = 5;
+    rom[2] = 69;
+    rom[3] = 255;
+
 
 }
 
@@ -125,4 +94,35 @@ void set_zero(int8_t bit)
 void print_dbg_info()
 {
     printf("SR %x, AC = %x, PC = %x,\n", SR, AC, PC);
+}
+
+/**********************sample micro instructions *****************/
+void microA()
+{
+    puts("hi1");
+}
+void microB()
+{
+    puts("hi2");
+}
+void microC()
+{
+    puts("hi3");
+}
+void microD()
+{
+    puts("hi4");
+}
+/******************************************************************/
+
+void mis_fetch_immediate_value()
+{
+    fetched_value = rom[++PC];
+}
+
+void mis_add_fval_accumlator()
+{
+    set_carry( AC + fetched_value < AC);
+    AC += fetched_value;
+    set_zero(!AC);
 }

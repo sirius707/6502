@@ -50,4 +50,14 @@ void (*micro_instructions[N_MI])();
 
 void execute_micro();
 
+
+///////micro instructions////
+void mis_fetch_immediate_value();
+void mis_add_fval_accumlator();
+
+////aux//////////////
+void print_dbg_info();
+void set_carry(int8_t bit);
+void set_zero(int8_t bit);
+
 #endif // CPU_H_INCLUDED
