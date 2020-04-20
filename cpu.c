@@ -33,9 +33,9 @@ void cpu_init(int8_t *memory, size_t n)
 
 
     rom[0] = 69;
-    rom[1] = 5;
+    rom[1] = 255;
     rom[2] = 69;
-    rom[3] = 255;
+    rom[3] = 124;
 
 
 }
@@ -73,16 +73,25 @@ void cpu_cycle()
     }
 }
 
-void set_carry(int8_t bit)
+
+//AUx functions
+inline void set_carry(uint16_t bit)
 {
-    if(bit){
+   if(bit){
         SR |= 0x01;
     }else{
         SR &= 0xFE;
     }
 }
 
-void set_zero(int8_t bit)
+inline uint8_t get_carry()
+{
+    if(SR & 0xFE)return 1;
+    return 0;
+}
+
+
+inline void set_zero(uint16_t bit)
 {
     if(bit){
         SR |= 0x02;
@@ -91,38 +100,58 @@ void set_zero(int8_t bit)
     }
 }
 
-void print_dbg_info()
+inline void set_negative(uint16_t bit)
 {
-    printf("SR %x, AC = %x, PC = %x,\n", SR, AC, PC);
+    if(bit){
+        SR |= 0x80;
+    }else{
+        SR &= 0x7F;
+    }
 }
 
-/**********************sample micro instructions *****************/
-void microA()
+inline void set_overflow(uint16_t bit)
 {
-    puts("hi1");
+    if(bit){
+        SR |= 0x40;
+    }else{
+        SR &= 0xBF;
+    }
 }
-void microB()
+
+inline bool is_ac_negative()
 {
-    puts("hi2");
+    return AC & 0x80;
 }
-void microC()
+void print_dbg_info()
 {
-    puts("hi3");
+    printf("SR 0x%x, AC = 0x%x, PC = 0x%x,\n", SR, AC, PC);
 }
-void microD()
+
+
+/**********************micro instructions***********************************/
+
+void fodder_op()//filler function
 {
-    puts("hi4");
+
 }
-/******************************************************************/
 
 void mis_fetch_immediate_value()
 {
     fetched_value = rom[++PC];
 }
 
+//ADC
 void mis_add_fval_accumlator()
 {
-    set_carry( AC + fetched_value < AC);
-    AC += fetched_value;
+    bool negative = is_ac_negative();
+    uint16_t tmp = AC + fetched_value + (SR&0x01);
+    set_carry( tmp > 0xff);
+
+    AC = tmp;
+
     set_zero(!AC);
+    set_negative(AC&0x80);
+
+    set_overflow(!(SR&0x01) && negative != is_ac_negative());
+
 }

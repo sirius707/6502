@@ -1,14 +1,15 @@
 # depslib dependency file v1.0
-1587163007 source:f:\blocks\6502 cpu\6502.c
+1587384432 source:f:\blocks\6502 cpu\6502.c
 	<stdio.h>
 	<stdlib.h>
 	"cpu.h"
 
-1587197676 f:\blocks\6502 cpu\cpu.h
+1587386760 f:\blocks\6502 cpu\cpu.h
 	<inttypes.h>
 	<stdlib.h>
+	<stdbool.h>
 
-1587197609 source:f:\blocks\6502 cpu\cpu.c
+1587387647 source:f:\blocks\6502 cpu\cpu.c
 	"cpu.h"
 	<stdio.h>
 
