@@ -49,6 +49,20 @@ void cpu_init(int8_t *memory, size_t n)
     instructions[0x0075].mis_pointers[2] = mis_fetch_value_lowbyte_address;;
     instructions[0x0075].mis_pointers[3] = mis_add_fval_accumlator;
 
+    instructions[0x006D].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x006D].mis_pointers[1] = mis_fetch_highbyte_address;
+    instructions[0x006D].mis_pointers[2] = mis_fetch_value_big_address;
+    instructions[0x006D].mis_pointers[3] = mis_add_fval_accumlator;
+
+    instructions[0x007D].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x007D].mis_pointers[1] = mis_fetch_highbyte_address;
+    instructions[0x007D].mis_pointers[2] = mis_fetch_value_big_address_with_x;
+    instructions[0x007D].mis_pointers[3] = mis_add_fval_accumlator;
+
+    instructions[0x0076].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x0076].mis_pointers[1] = mis_fetch_highbyte_address;
+    instructions[0x0076].mis_pointers[2] = mis_fetch_value_big_address_with_y;
+    instructions[0x0076].mis_pointers[3] = mis_add_fval_accumlator;
 
     //STA
     instructions[0x0085].mis_pointers[0] = mis_fetch_lowbyte_address;
@@ -66,7 +80,7 @@ void cpu_init(int8_t *memory, size_t n)
     rom[3] = 35;
     rom[4] = 0x00A2;
     rom[5] = 33;
-    rom[6] = 0x0075;
+    rom[6] = 0x007D;
     rom[7] = 2;
 
 
@@ -188,9 +202,58 @@ void mis_fetch_lowbyte_address()
     fetched_low_address = rom[++PC];//should the rom and the memory be the same array? stay tuned
 }
 
+void mis_fetch_highbyte_address()
+{
+    fetched_high_address = rom[++PC];//should the rom and the memory be the same array? stay tuned
+}
+
+
 void mis_fetch_value_lowbyte_address()
 {
     fetched_value = rom[fetched_low_address];
+}
+
+void mis_fetch_value_big_address()
+{
+    uint16_t big_address = 0;
+    big_address |= fetched_high_address << 4;
+    big_address |= fetched_low_address;
+
+    fetched_value = rom[big_address];
+}
+
+void mis_fetch_value_big_address_with_x()
+{
+    fetched_low_address += XR;
+
+    if(fetched_low_address < XR){
+        fetched_high_address += 1;
+        extra_ptr = mis_fetch_value_big_address;
+        return;
+    }
+
+    uint16_t big_address = 0;
+    big_address |= fetched_high_address << 4;
+    big_address |= fetched_low_address;
+
+    fetched_value = rom[big_address];
+}
+
+void mis_fetch_value_big_address_with_y()
+{
+    fetched_low_address += YR;
+
+    if(fetched_low_address < YR){
+        fetched_high_address += 1;
+        extra_ptr = mis_fetch_value_big_address;
+        return;
+    }
+
+    uint16_t big_address = 0;
+    big_address |= fetched_high_address << 4;
+    big_address |= fetched_low_address;
+
+    fetched_value = rom[big_address];
 }
 
 void mis_add_x_lowbyte_address()
