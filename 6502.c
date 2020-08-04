@@ -16,7 +16,7 @@ int main()
     cpu_cycle();
     cpu_cycle();
     cpu_cycle();
-    cpu_cycle();
+
 
     print_dbg_info();
 

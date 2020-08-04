@@ -64,24 +64,36 @@ void cpu_init(int8_t *memory, size_t n)
     instructions[0x0076].mis_pointers[2] = mis_fetch_value_big_address_with_y;
     instructions[0x0076].mis_pointers[3] = mis_add_fval_accumlator;
 
+    instructions[0x0061].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x0061].mis_pointers[1] = mis_add_x_lowbyte_address;
+    instructions[0x0061].mis_pointers[2] = mis_indirect_x;
+    instructions[0x0061].mis_pointers[3] = mis_fetch_value_big_address;
+    instructions[0x0061].mis_pointers[4] = mis_add_fval_accumlator;
+
+
     //STA
     instructions[0x0085].mis_pointers[0] = mis_fetch_lowbyte_address;
     instructions[0x0085].mis_pointers[1] = mis_set_lowbyte_destination;
     instructions[0x0085].mis_pointers[2] = mis_store_ac_in_low_destination;
 
+    instructions[0x008D].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x008D].mis_pointers[1] = mis_fetch_highbyte_address;
+    instructions[0x008D].mis_pointers[2] = mis_set_highbyte_destination;
+    instructions[0x008D].mis_pointers[3] = mis_store_ac_in_big_destination;
+
     //LDx
     instructions[0x00A2].mis_pointers[0] = mis_fetch_immediate_value;
     instructions[0x00A2].mis_pointers[1] = mis_load_xr_fval;
 
+    rom[0] = 0x69;
+    rom[1] = 0x3;
+    rom[2] = 0x008D;
+    rom[3] = 0x22;
+    rom[4] = 0x22;
+    rom[5] = 0x6D;
+    rom[6] = 0x22;
+    rom[7] = 0x22;
 
-    rom[0] = 0x0069;
-    rom[1] = 2;
-    rom[2] = 0x0085;
-    rom[3] = 35;
-    rom[4] = 0x00A2;
-    rom[5] = 33;
-    rom[6] = 0x007D;
-    rom[7] = 2;
 
 
 }
@@ -216,10 +228,11 @@ void mis_fetch_value_lowbyte_address()
 void mis_fetch_value_big_address()
 {
     uint16_t big_address = 0;
-    big_address |= fetched_high_address << 4;
+    big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
     fetched_value = rom[big_address];
+
 }
 
 void mis_fetch_value_big_address_with_x()
@@ -233,7 +246,7 @@ void mis_fetch_value_big_address_with_x()
     }
 
     uint16_t big_address = 0;
-    big_address |= fetched_high_address << 4;
+    big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
     fetched_value = rom[big_address];
@@ -250,7 +263,7 @@ void mis_fetch_value_big_address_with_y()
     }
 
     uint16_t big_address = 0;
-    big_address |= fetched_high_address << 4;
+    big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
     fetched_value = rom[big_address];
@@ -266,11 +279,51 @@ void mis_set_lowbyte_destination()
     low_byte_destination = fetched_low_address;
 }
 
+void mis_set_highbyte_destination()
+{
+    low_byte_destination = fetched_low_address;
+    high_byte_destination = fetched_high_address;
+}
+
+void mis_indirect_x()
+{
+    fetched_high_address = fetched_low_address + 1;
+}
+
+void mis_fetch_indirect_address_from_fetched_big_address()
+{
+    uint16_t big_address = 0;
+    uint8_t effective_high_address = 0;
+    uint8_t effective_low_address = 0;
+
+    big_address |= fetched_high_address << 8;
+    big_address |= fetched_low_address;
+
+    effective_high_address = rom[big_address] >> 8;
+    effective_low_address = rom[big_address];
+
+    fetched_high_address = effective_high_address;
+    fetched_low_address = effective_low_address;
+}
+
 //sta
 void mis_store_ac_in_low_destination()
 {
     rom[low_byte_destination] = AC;
 }
+
+void mis_store_ac_in_big_destination()
+{
+     uint16_t big_address = 0;
+     big_address |= high_byte_destination << 8;
+     big_address |= low_byte_destination;
+
+     rom[big_address] = AC;
+
+     printf("%x", big_address);
+     getchar();
+}
+
 //ADC
 void mis_add_fval_accumlator()
 {
@@ -286,6 +339,7 @@ void mis_add_fval_accumlator()
     set_overflow(!(SR&CARRY) && negative != is_ac_negative());
 
 }
+
 
 //ldx
 void mis_load_xr_fval()

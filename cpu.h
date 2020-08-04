@@ -63,11 +63,14 @@ void mis_fetch_value_big_address_with_x();
 void mis_fetch_value_big_address_with_y();
 void mis_fetch_lowbyte_address();
 void mis_fetch_highbyte_address();
+void mis_fetch_indirect_address_from_fetched_big_address();
 void mis_set_lowbyte_destination();
 void mis_store_ac_in_low_destination();
 void mis_add_x_lowbyte_address();
 void mis_load_xr_fval();
-
+void mis_indirect_x();
+void mis_set_highbyte_destination();
+void mis_store_ac_in_big_destination();
 ////aux//////////////
 void print_dbg_info();
 void set_carry(uint16_t bit);
