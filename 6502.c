@@ -6,16 +6,7 @@ int main()
 {
     cpu_init(NULL, 0);
 
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
+    play();
 
 
     print_dbg_info();

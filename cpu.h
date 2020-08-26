@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define END_OF_ROM 0xFF
+
 #define N_MI 4 //number of micro instructions
 #define N_INSTRUCTS 300 //number of instructions
 
@@ -37,7 +39,7 @@ static unsigned int fetched_instruction; // instruction to excute next
 INSTRUCTION instructions[N_INSTRUCTS];
 
 void cpu_init(int8_t *memory, size_t n);
-void cpu_cycle();
+bool cpu_cycle();
 
 
 //micro instruction control
@@ -52,7 +54,7 @@ static void (*extra_ptr)();//index of an ekstra micro instruction
 void (*micro_instructions[N_MI])();
 
 void execute_micro();
-
+int play();
 
 ///////micro instructions////
 void mis_fetch_immediate_value();
@@ -61,16 +63,30 @@ void mis_fetch_value_lowbyte_address();
 void mis_fetch_value_big_address();
 void mis_fetch_value_big_address_with_x();
 void mis_fetch_value_big_address_with_y();
+void mis_fetch_value_from_a();
+void mis_fetch_value_from_sp();
+
+
 void mis_fetch_lowbyte_address();
 void mis_fetch_highbyte_address();
 void mis_fetch_indirect_address_from_fetched_big_address();
 void mis_set_lowbyte_destination();
 void mis_store_ac_in_low_destination();
-void mis_add_x_lowbyte_address();
-void mis_load_xr_fval();
-void mis_indirect_x();
-void mis_set_highbyte_destination();
 void mis_store_ac_in_big_destination();
+void mis_store_x_in_low_destination();
+void mis_store_x_in_big_destination();
+void mis_store_y_in_low_destination();
+void mis_store_y_in_big_destination();
+void mis_add_x_lowbyte_address();
+void mis_add_y_lowbyte_address();
+void mis_load_xr_fval();
+void mis_set_highbyte_destination();
+
+
+void mis_store_fetched_x();
+void mis_store_fetched_y();
+
+void mis_indirect_x();
 ////aux//////////////
 void print_dbg_info();
 void set_carry(uint16_t bit);
