@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define END_OF_ROM 0xFF
+#define END_OF_ROM 0xFE
 
 #define N_MI 4 //number of micro instructions
 #define N_INSTRUCTS 300 //number of instructions
@@ -24,7 +24,7 @@ static int8_t *stk;
 static int8_t *cpu_memory;
 static size_t memory_size;
 
-uint8_t rom[N_ROM];
+uint8_t memory[N_ROM];
 
 //registers
 uint16_t PC;
@@ -35,10 +35,10 @@ uint8_t AC;
 uint8_t SP;//stack pointer
 
 size_t cycle_count;
-static unsigned int fetched_instruction; // instruction to excute next
+static int fetched_instruction; // instruction to excute next
 INSTRUCTION instructions[N_INSTRUCTS];
 
-void cpu_init(int8_t *memory, size_t n);
+void cpu_init(uint8_t *memory, size_t n);
 bool cpu_cycle();
 
 

@@ -8,11 +8,11 @@
 #define OVERF 7
 #define NEGAT 8
 
-void cpu_init(int8_t *memory, size_t n)
+void cpu_init(uint8_t *memory, size_t n)
 {
     cycle_count = 0;
 
-    cpu_memory = memory;
+    //cpu_memory = memory;
     memory_size = n;
 
     PC = SR = XR = YR = AC = SP = 0;
@@ -32,7 +32,12 @@ void cpu_init(int8_t *memory, size_t n)
         micro_instructions[i] = NULL;
     }
 
-    for(int i = 0; i < N_ROM; i++)rom[i] = END_OF_ROM;
+    //for(int i = 0; i < N_ROM; i++)memory[i] = END_OF_ROM;
+    if(memory != NULL){
+        for(int i = 0; i < memory_size; i++){
+                memory[i] = 0;
+        }
+    }
     mipc = 0;
     extra_ptr = NULL;
     fetched_instruction = -1;
@@ -98,19 +103,19 @@ void cpu_init(int8_t *memory, size_t n)
     instructions[0x008E].mis_pointers[3] = mis_store_x_in_big_destination;
 
     //STY
-    instructions[0x0086].mis_pointers[0] = mis_fetch_lowbyte_address;
-    instructions[0x0086].mis_pointers[1] = mis_set_lowbyte_destination;
-    instructions[0x0086].mis_pointers[2] = mis_store_y_in_low_destination;
+    instructions[0x0084].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x0084].mis_pointers[1] = mis_set_lowbyte_destination;
+    instructions[0x0084].mis_pointers[2] = mis_store_y_in_low_destination;
 
-    instructions[0x0096].mis_pointers[0] = mis_fetch_lowbyte_address;
-    instructions[0x0096].mis_pointers[1] = mis_add_x_lowbyte_address;
-    instructions[0x0096].mis_pointers[2] = mis_set_highbyte_destination;
-    instructions[0x0096].mis_pointers[3] = mis_store_y_in_low_destination;
+    instructions[0x0094].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x0094].mis_pointers[1] = mis_add_x_lowbyte_address;
+    instructions[0x0094].mis_pointers[2] = mis_set_highbyte_destination;
+    instructions[0x0094].mis_pointers[3] = mis_store_y_in_low_destination;
 
-    instructions[0x008E].mis_pointers[0] = mis_fetch_lowbyte_address;
-    instructions[0x008E].mis_pointers[1] = mis_fetch_highbyte_address;
-    instructions[0x008E].mis_pointers[2] = mis_set_highbyte_destination;
-    instructions[0x008E].mis_pointers[3] = mis_store_y_in_big_destination;
+    instructions[0x008C].mis_pointers[0] = mis_fetch_lowbyte_address;
+    instructions[0x008C].mis_pointers[1] = mis_fetch_highbyte_address;
+    instructions[0x008C].mis_pointers[2] = mis_set_highbyte_destination;
+    instructions[0x008C].mis_pointers[3] = mis_store_y_in_big_destination;
 
     //LDx
     instructions[0x00A2].mis_pointers[0] = mis_fetch_immediate_value;
@@ -129,15 +134,13 @@ void cpu_init(int8_t *memory, size_t n)
     instructions[0x00BA].mis_pointers[1] = mis_store_fetched_x;
 
 
-    rom[0] = 0x69;
-    rom[1] = 0x3;
-    rom[2] = 0x008D;
-    rom[3] = 0x22;
-    rom[4] = 0x22;
-    rom[5] = 0x6D;
-    rom[6] = 0x22;
-    rom[7] = 0x22;
-    rom[8] = END_OF_ROM;
+
+    memory[0] = 0x69;
+    memory[1] = 0x1;
+    memory[2] = 0x00AA;
+    memory[3] = 0x86;
+    memory[4] = 0x22;//address
+    memory[5] = END_OF_ROM;
 
 
 }
@@ -160,7 +163,7 @@ bool cpu_cycle()
     INSTRUCTION *instr_ptr;
 
     if(fetched_instruction == -1){
-        fetched_instruction = rom[PC];
+        fetched_instruction = memory[PC];
 
         if(fetched_instruction == END_OF_ROM){
                 return false;
@@ -266,23 +269,23 @@ void fodder_op()//filler function
 
 void mis_fetch_immediate_value()
 {
-    fetched_value = rom[++PC];
+    fetched_value = memory[++PC];
 }
 
 void mis_fetch_lowbyte_address()
 {
-    fetched_low_address = rom[++PC];//should the rom and the memory be the same array? stay tuned
+    fetched_low_address = memory[++PC];//should the memory and the memory be the same array? stay tuned
 }
 
 void mis_fetch_highbyte_address()
 {
-    fetched_high_address = rom[++PC];//should the rom and the memory be the same array? stay tuned
+    fetched_high_address = memory[++PC];//should the memory and the memory be the same array? stay tuned
 }
 
 
 void mis_fetch_value_lowbyte_address()
 {
-    fetched_value = rom[fetched_low_address];
+    fetched_value = memory[fetched_low_address];
 }
 
 void mis_fetch_value_big_address()
@@ -291,7 +294,7 @@ void mis_fetch_value_big_address()
     big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
-    fetched_value = rom[big_address];
+    fetched_value = memory[big_address];
 
 }
 
@@ -309,7 +312,7 @@ void mis_fetch_value_big_address_with_x()
     big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
-    fetched_value = rom[big_address];
+    fetched_value = memory[big_address];
 }
 
 void mis_fetch_value_big_address_with_y()
@@ -326,7 +329,7 @@ void mis_fetch_value_big_address_with_y()
     big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
-    fetched_value = rom[big_address];
+    fetched_value = memory[big_address];
 }
 
 void mis_add_x_lowbyte_address()
@@ -365,8 +368,8 @@ void mis_fetch_indirect_address_from_fetched_big_address()
     big_address |= fetched_high_address << 8;
     big_address |= fetched_low_address;
 
-    effective_high_address = rom[big_address] >> 8;
-    effective_low_address = rom[big_address];
+    effective_high_address = memory[big_address] >> 8;
+    effective_low_address = memory[big_address];
 
     fetched_high_address = effective_high_address;
     fetched_low_address = effective_low_address;
@@ -375,17 +378,17 @@ void mis_fetch_indirect_address_from_fetched_big_address()
 //sta
 void mis_store_ac_in_low_destination()
 {
-    rom[low_byte_destination] = AC;
+    memory[low_byte_destination] = AC;
 }
 
 void mis_store_x_in_low_destination()
 {
-    rom[low_byte_destination] = XR;
+    memory[low_byte_destination] = XR;
 }
 
 void mis_store_y_in_low_destination()
 {
-    rom[low_byte_destination] = YR;
+    memory[low_byte_destination] = YR;
 }
 
 void mis_store_ac_in_big_destination()
@@ -394,7 +397,7 @@ void mis_store_ac_in_big_destination()
      big_address |= high_byte_destination << 8;
      big_address |= low_byte_destination;
 
-     rom[big_address] = AC;
+     memory[big_address] = AC;
 }
 void mis_store_x_in_big_destination()
 {
@@ -402,7 +405,7 @@ void mis_store_x_in_big_destination()
      big_address |= high_byte_destination << 8;
      big_address |= low_byte_destination;
 
-     rom[big_address] = XR;
+     memory[big_address] = XR;
 }
 
 void mis_store_y_in_big_destination()
@@ -411,7 +414,7 @@ void mis_store_y_in_big_destination()
      big_address |= high_byte_destination << 8;
      big_address |= low_byte_destination;
 
-     rom[big_address] = YR;
+     memory[big_address] = YR;
 }
 
 
