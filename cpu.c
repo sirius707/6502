@@ -8,11 +8,14 @@
 #define OVERF 7
 #define NEGAT 8
 
-void cpu_init(uint8_t *memory, size_t n)
+#define FIRST_INSTRUCTION_LOCATION 0
+
+void cpu_init(uint8_t *ram, size_t n)
 {
     cycle_count = 0;
 
     //cpu_memory = memory;
+    memory = ram;
     memory_size = n;
 
     PC = SR = XR = YR = AC = SP = 0;
@@ -157,7 +160,7 @@ void execute_micro()
     cycle_count++;
 }
 
-
+/*obsolete
 bool cpu_cycle()
 {
     INSTRUCTION *instr_ptr;
@@ -185,7 +188,32 @@ bool cpu_cycle()
 
     return true;
 }
+*/
 
+//test cpu
+//return: number of cycles
+int cpu_play()
+{
+    fetched_instruction = memory[FIRST_INSTRUCTION_LOCATION];
+    INSTRUCTION *instr_ptr;
+
+    while(fetched_instruction != END_OF_ROM){
+        instr_ptr = &instructions[fetched_instruction];
+
+        while(instr_ptr->mis_pointers[mipc] != NULL){
+            execute_micro();
+        }
+
+        mipc = 0;
+        fetched_low_address = 0;
+        fetched_high_address = 0;
+        fetched_value = AC;
+        PC++;
+        fetched_instruction = memory[PC];
+    }
+
+    return cycle_count;
+}
 
 //AUx functions
 inline void set_carry(uint16_t bit)
@@ -250,15 +278,6 @@ void print_dbg_info()
 
 }
 
-//test cpu
-//return: number of cycles
-int play()
-{
-    int i = 0;
-    while(cpu_cycle())i++;
-
-    return i;
-}
 
 /**********************micro instructions***********************************/
 

@@ -9,14 +9,8 @@ int main()
 {
     cpu_init(ram, RAM_SIZE);
 
-    //printf("%d %x\n", play(), ram[0x22]);
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
-    cpu_cycle();
+    printf("cycles: %d\n", cpu_play(), ram[0x22]);
+
     print_dbg_info();
 
     return 0;

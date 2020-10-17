@@ -24,7 +24,7 @@ static int8_t *stk;
 static int8_t *cpu_memory;
 static size_t memory_size;
 
-uint8_t memory[N_ROM];
+uint8_t *memory;//memory pointer, assign in init
 
 //registers
 uint16_t PC;
@@ -38,7 +38,7 @@ size_t cycle_count;
 static int fetched_instruction; // instruction to excute next
 INSTRUCTION instructions[N_INSTRUCTS];
 
-void cpu_init(uint8_t *memory, size_t n);
+void cpu_init(uint8_t *ram, size_t n);
 bool cpu_cycle();
 
 
@@ -54,7 +54,7 @@ static void (*extra_ptr)();//index of an ekstra micro instruction
 void (*micro_instructions[N_MI])();
 
 void execute_micro();
-int play();
+int cpu_play();
 
 ///////micro instructions////
 void mis_fetch_immediate_value();
